@@ -1,0 +1,2 @@
+- Cập nhật cho chọn phần thưởng cho từng ô (vòng quay)
+- Sửa lỗi thẻ cào bị Pending (cộng tiền ngay nếu web gạch thẻ duyệt ngay, không đợi webhook)

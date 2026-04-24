@@ -1,0 +1,12 @@
+[20-Nov-2023 05:07:01 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.4.33. in /home/bhaiduongbbsvn/public_html/vendor/composer/platform_check.php on line 24
+[10-Jan-2024 08:27:52 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.4.33. in /home/ptaowebcom/shopnickv3.duongminhkhoi.shop/vendor/composer/platform_check.php on line 24
+[20-Jan-2024 00:33:57 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.4.33. in /home/xshopkhanhoricom/public_html/vendor/composer/platform_check.php on line 24
+[20-Jan-2024 00:34:03 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.4.33. in /home/xshopkhanhoricom/public_html/vendor/composer/platform_check.php on line 24
+[20-Jan-2024 00:34:03 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.4.33. in /home/xshopkhanhoricom/public_html/vendor/composer/platform_check.php on line 24
+[24-Apr-2025 13:23:07 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.4.33. in /home/bloxv4/public_html/vendor/composer/platform_check.php on line 24
+[28-Apr-2025 14:40:33 UTC] PHP Parse error:  Unmatched '}' in /home/bloxv4/public_html/app/Helpers/Helper2.php on line 202
+[28-Apr-2025 14:40:35 UTC] PHP Parse error:  Unmatched '}' in /home/bloxv4/public_html/app/Helpers/Helper2.php on line 202
+[28-Apr-2025 14:40:43 UTC] PHP Parse error:  Unmatched '}' in /home/bloxv4/public_html/app/Helpers/Helper2.php on line 202
+[28-Apr-2025 14:40:44 UTC] PHP Parse error:  Unmatched '}' in /home/bloxv4/public_html/app/Helpers/Helper2.php on line 202
+[28-Apr-2025 14:40:44 UTC] PHP Parse error:  Unmatched '}' in /home/bloxv4/public_html/app/Helpers/Helper2.php on line 202
+[28-Apr-2025 14:40:44 UTC] PHP Parse error:  Unmatched '}' in /home/bloxv4/public_html/app/Helpers/Helper2.php on line 202
