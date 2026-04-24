@@ -1,13 +1,14 @@
 # DEPLOY LARAVEL LEN HOSTINGER - SHOPTQ4.COM
 
 ## MUC TIEU
+
 - Source Laravel nam trong `shop`
 - Web public nam trong `public_html`
 - Khong de lo `.env`, `vendor`, `app`, `config` ra ngoai web
 
 ---
 
-## CAU TRUC DUNG
+## CAU TRUC DUNG CHUNG
 
 ```text
 /home/u692177358/domains/shoptq4.com/
@@ -34,11 +35,11 @@
     ├── static/
     ├── uploads/
     └── cac asset khac
-    
-    
-## 
 
-- Đẩy code lên và đặt tên vd: shop, vào public copy code sang public_html/ 
+
+##
+
+- Đẩy code lên và đặt tên vd: shop, vào public copy code sang public_html/
 1. Sửa public_html/index.php
 
 <?php
@@ -73,7 +74,7 @@ Tìm đoạn: $app = new Illuminate\Foundation\Application(
 );
 Thêm vào dưới đoạn trên: $app->usePublicPath(dirname($app->basePath()).'/public_html');
 
-3. Sửa .env 
+3. Sửa .env
 
 APP_NAME=Laravel
 APP_ENV=production
@@ -139,3 +140,4 @@ $app->usePublicPath(dirname($app->basePath()).'/public_html');
 6. Thẻ cào bên Admin bị set cứng đổi ở: resources/views/admin/settings/apis.blade.php
 - Tìm <input type="text" class="form-control" id="api_url" name="api_url" value="https://khothegame.com" placeholder="https://khothegame.com" readonly>
 - Đổi: <input type="text" class="form-control" id="api_url" name="api_url" value="{{ $charging_card['api_url'] ?? '' }}" placeholder="https://thegiare.com">
+```
