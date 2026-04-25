@@ -51,14 +51,21 @@
                 <td>{{ $item->assigned_completed ?? '-' }}</td>
                 <td>{{ $item->assigned_payment > 0 ? Helper::formatCurrency($item->assigned_payment) : '-' }}</td>
                 <td>
-                  @if ($item->assigned_status === 'Completed')
-                    <span class="badge bg-success">Đã nhận</span>
-                  @elseif ($item->assigned_status === 'WaitPayment')
-                    <span class="badge bg-warning">Chờ duyệt</span>
-                  @else
-                    <span class="badge bg-danger">Chưa nhận</span>
-                  @endif
-                </td>
+  @if ($item->assigned_status === 'Completed')
+    <span class="badge bg-success">Đã duyệt</span>
+
+  @elseif ($item->assigned_status === 'WaitPayment')
+    <form action="{{ route('admin.boosting.orders.approve-payment', $item->id) }}" method="POST">
+      @csrf
+      <button type="submit" class="btn btn-sm btn-success">
+        Duyệt tiền
+      </button>
+    </form>
+
+  @else
+    <span class="badge bg-danger">Chưa nhận</span>
+  @endif
+</td>
               </tr>
             @endforeach
           </tbody>

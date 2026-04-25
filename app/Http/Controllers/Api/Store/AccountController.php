@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Store;
 
 use App\Http\Controllers\Controller;
+use App\Models\CollaTransaction;
 use App\Models\Group;
 use App\Models\ListItem;
 use App\Models\User;
@@ -14,7 +15,7 @@ class AccountController extends Controller
 {
   public function index(Request $request)
   {
-    $payload    = $request->validate([
+    $payload = $request->validate([
       'page'       => 'nullable|integer',
       'limit'      => 'nullable|integer',
       'price'      => 'nullable|string',
@@ -24,6 +25,7 @@ class AccountController extends Controller
       'sort_type'  => 'nullable|string|in:asc,desc',
       'display_by' => 'nullable|string|in:created_at_asc,created_at_desc,price_asc,price_desc,priority_asc,priority_desc',
     ]);
+
     $page       = $payload['page'] ?? 1;
     $limit      = $payload['limit'] ?? 10;
     $search     = $payload['search'] ?? null;
@@ -31,7 +33,6 @@ class AccountController extends Controller
     $sort_by    = $payload['sort_by'] ?? 'id';
     $sort_type  = $payload['sort_type'] ?? 'desc';
     $display_by = $payload['display_by'] ?? null;
-
 
     $group = Group::where('id', $payload['group_id'])->where('status', true)->first();
 
@@ -42,7 +43,10 @@ class AccountController extends Controller
       ], 400);
     }
 
-    $query = $group->items()->where('buyer_name', null)->where('buyer_code', null)->where('status', true);
+    $query = $group->items()
+      ->where('buyer_name', null)
+      ->where('buyer_code', null)
+      ->where('status', true);
 
     if (isset($search)) {
       if (is_numeric($search)) {
@@ -55,8 +59,6 @@ class AccountController extends Controller
             ->orWhere('raw_skins', 'like', '%' . $search . '%');
         });
       }
-
-
     }
 
     if (isset($payload['sort_by'])) {
@@ -65,6 +67,7 @@ class AccountController extends Controller
 
     if (isset($payload['price'])) {
       $price = explode('-', $payload['price']);
+
       if (count($price) === 2) {
         if (is_numeric($price[0]) && is_numeric($price[1])) {
           if ($price[1] <= 0) {
@@ -76,42 +79,39 @@ class AccountController extends Controller
       }
     }
 
+    $total = $query->count();
+
     $meta = [
       'page'       => (int) $page,
       'limit'      => (int) $limit,
-      'total_rows' => $query->count(),
-      'total_page' => ceil($query->count() / $limit),
+      'total_rows' => $total,
+      'total_page' => ceil($total / $limit),
     ];
 
     if ($display_by !== null) {
       if ($display_by === 'created_at_asc') {
         $query = $query->orderBy('created_at', 'asc');
-      } else if ($display_by === 'created_at_desc') {
+      } elseif ($display_by === 'created_at_desc') {
         $query = $query->orderBy('created_at', 'desc');
-      } else if ($display_by === 'price_asc') {
+      } elseif ($display_by === 'price_asc') {
         $query = $query->orderBy('price', 'asc');
-      } else if ($display_by === 'price_desc') {
+      } elseif ($display_by === 'price_desc') {
         $query = $query->orderBy('price', 'desc');
-      } else if ($display_by === 'priority') {
+      } elseif ($display_by === 'priority_asc') {
         $query = $query->orderBy('priority', 'asc');
-      } else if ($display_by === 'priority_desc') {
+      } elseif ($display_by === 'priority_desc') {
         $query = $query->orderBy('priority', 'desc');
       }
     } else {
       $query = $query->orderBy('priority', 'desc')->orderBy($sort_by, $sort_type);
     }
 
-    $data = $query->skip($offset)
-      ->take($limit)
-      ->get();
+    $data = $query->skip($offset)->take($limit)->get();
 
     $data = $data->map(function ($item) {
       $item->makeHidden(['list_image', 'description', 'list_skin', 'list_champ']);
       return $item;
     });
-
-    // $data = $data->toArray();
-
 
     return response()->json([
       'data'    => [
@@ -213,8 +213,8 @@ class AccountController extends Controller
     }
 
     if (!$item->payment) {
-      $timeWait   = setting('time_wait_free', 10); // seconds
-      $lastAction = $user->last_action; // timestamp
+      $timeWait   = setting('time_wait_free', 10);
+      $lastAction = $user->last_action;
 
       if ($lastAction !== null) {
         $timeDiff = now()->diffInSeconds($lastAction);
@@ -259,7 +259,7 @@ class AccountController extends Controller
       'buyer_date' => now(),
     ]);
 
-    $group = isset($item->group) ? $item->group->name : '-';
+    $groupName = isset($item->group) ? $item->group->name : '-';
 
     $user->transactions()->create([
       'code'           => $code,
@@ -274,28 +274,57 @@ class AccountController extends Controller
         'account_id' => $item->id,
       ],
       'status'         => 'paid',
-      'content'        => 'Mua tài khoản #' . $item->code . '; Nhóm ' . $group,
+      'content'        => 'Mua tài khoản #' . $item->code . '; Nhóm ' . $groupName,
       'user_id'        => $user->id,
       'username'       => $user->username,
     ]);
 
+    /*
+     * CTV bán acc:
+     * Khách mua xong thì cộng hoa hồng thẳng vào colla_balance của CTV.
+     * CTV rút tiền thì vẫn chờ admin duyệt ở flow rút tiền.
+     */
     if ($item->staff_name) {
-      $client = User::where('username', $item->staff_name)->first();
-      if ($client) {
-        $payment = (float) (($item->payment * $client->colla_percent) / 100);
+      $staff = User::where('username', $item->staff_name)->first();
 
-        $item->update([
-          'staff_payment'      => $payment,
-          'staff_status'       => 'WaitPayment',
-          'staff_completed_at' => now(),
-        ]);
+      if ($staff && $staff->colla_type === 'account') {
+        $payment = (float) (($item->payment * $staff->colla_percent) / 100);
+
+        if ($payment > 0) {
+          $balanceBefore = $staff->colla_balance;
+          $balanceAfter  = $balanceBefore + $payment;
+
+          $staff->update([
+            'colla_balance' => $balanceAfter,
+          ]);
+
+          $item->update([
+            'staff_payment'      => $payment,
+            'staff_status'       => 'Completed',
+            'staff_completed_at' => now(),
+          ]);
+
+          CollaTransaction::create([
+            'type'           => 'account',
+            'user_id'        => $staff->id,
+            'username'       => $staff->username,
+            'amount'         => $payment,
+            'status'         => 'Completed',
+            'reference'      => $item->code,
+            'description'    => 'Hoa hồng bán tài khoản #' . $item->code,
+            'balance_before' => $balanceBefore,
+            'balance_after'  => $balanceAfter,
+          ]);
+        }
       }
     }
 
     if (domain() !== 'shopgame5sao.com') {
       $ref = $user->referrer;
+
       if ($ref !== null) {
         $affiliate = $ref->affiliate;
+
         if ($affiliate !== null) {
           $affiliate->increment('total_account_buy');
         }
@@ -303,10 +332,16 @@ class AccountController extends Controller
     }
 
     try {
-      // thông báo đơn mua tài khoản mới
-      Helper::sendMessageTelegram("📦📦📦 ĐƠN HÀNG TÀI KHOẢN 📦📦📦\nMã đơn: " . $code . "\nDịch vụ: " . $item->name . "\nThanh toán: " . Helper::formatCurrency($item->payment) . "\nTài khoản: " . $user->username . "\nThời gian: " . $item->created_at . "\n");
+      Helper::sendMessageTelegram(
+        "📦📦📦 ĐƠN HÀNG TÀI KHOẢN 📦📦📦\n" .
+        "Mã đơn: " . $code . "\n" .
+        "Dịch vụ: " . $item->name . "\n" .
+        "Thanh toán: " . Helper::formatCurrency($item->payment) . "\n" .
+        "Tài khoản: " . $user->username . "\n" .
+        "Thời gian: " . $item->created_at . "\n"
+      );
     } catch (\Exception $e) {
-      // loi
+      //
     }
 
     return response()->json([
@@ -347,7 +382,6 @@ class AccountController extends Controller
 
     file_put_contents($path, $response->body());
 
-
     return response($response->body(), 200)->header('Content-Type', 'image/png');
   }
 
@@ -374,7 +408,6 @@ class AccountController extends Controller
     }
 
     file_put_contents($path, $response->body());
-
 
     return response($response->body(), 200)->header('Content-Type', 'image/png');
   }

@@ -339,11 +339,21 @@ Route::middleware(['auth', 'check.last.login', 'admin'])->prefix('/admin')->grou
     Route::post('/delete', [App\Http\Controllers\Admin\Boosting\PackageController::class, 'delete'])->name('admin.boosting.packages.delete');
   });
   // Boosting/Orders -> Packages
-  Route::prefix('/boosting/orders')->group(function () {
-    Route::get('/', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'index'])->name('admin.boosting.orders');
-    Route::post('/update', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'update'])->name('admin.boosting.orders.update');
-    Route::post('/refund', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'refund'])->name('admin.boosting.orders.refund');
-  });
+  // Route::prefix('/boosting/orders')->group(function () {
+  //   Route::get('/', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'index'])->name('admin.boosting.orders');
+  //   Route::post('/update', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'update'])->name('admin.boosting.orders.update');
+  //   Route::post('/refund', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'refund'])->name('admin.boosting.orders.refund');
+  // });
+
+  // Boosting/Orders -> Packages
+Route::prefix('/boosting/orders')->group(function () {
+  Route::get('/', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'index'])->name('admin.boosting.orders');
+  Route::post('/update', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'update'])->name('admin.boosting.orders.update');
+  Route::post('/refund', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'refund'])->name('admin.boosting.orders.refund');
+
+  Route::post('/approve-payment/{id}', [App\Http\Controllers\Admin\Boosting\OrderController::class, 'approvePayment'])
+    ->name('admin.boosting.orders.approve-payment');
+});
   // Withdraws -> Staff
   Route::prefix('/staff')->group(function () {
     Route::prefix('/withdraws')->group(function () {

@@ -20,8 +20,9 @@ class UserController extends Controller
   public function show($id)
   {
     $user = User::findOrFail($id);
+    $groups = Group::where('status', true)->orderBy('id', 'desc')->get();
 
-    return view('admin.users.show', compact('user'));
+    return view('admin.users.show', compact('user', 'groups'));
   }
 
   public function update(Request $request, $id)
@@ -30,31 +31,37 @@ class UserController extends Controller
 
     if ($action === 'update-info') {
       $payload = $request->validate([
-        'role'            => 'required|in:admin,member,collaborator,partner,accounting',
-        'email'           => 'required|email|unique:users,email,' . $id,
-        'status'          => 'required|in:active,locked',
-        'password'        => 'nullable|string|min:6',
-        'balance_1'       => 'required|numeric|min:0',
-        'colla_type'      => 'nullable|in:account,boosting,items',
-        'colla_percent'   => 'nullable|numeric|min:0|max:100',
-        'staff_group_ids' => 'nullable|array',
+        'role'              => 'required|in:admin,member,collaborator,partner,accounting',
+        'email'             => 'required|email|unique:users,email,' . $id,
+        'status'            => 'required|in:active,locked',
+        'password'          => 'nullable|string|min:6',
+        'balance_1'         => 'required|numeric|min:0',
+        'colla_type'        => 'nullable|in:account,boosting,items',
+        'colla_percent'     => 'nullable|numeric|min:0|max:100',
+        'staff_group_ids'   => 'nullable|array',
+        'staff_group_ids.*' => 'integer|exists:groups,id',
       ]);
 
       $user = User::findOrFail($id);
 
-      if (isset($payload['password'])) {
+      if (!empty($payload['password'])) {
         $payload['password'] = bcrypt($payload['password']);
       } else {
         unset($payload['password']);
       }
 
-      if (isset($payload['colla_type']) && $payload['colla_type'] === 'account') {
-        $group_ids = [];
-        $group_ids = array_map('intval', $payload['staff_group_ids'] ?? $user->staff_group_ids);
+      /*
+       * Nếu là CTV tài khoản:
+       * - Lưu đúng nhóm admin đã chọn trong form.
+       * - Không tự động gán tất cả nhóm nữa.
+       */
+      if (($request->input('colla_type') ?? null) === 'account') {
+        $groupIds = array_map('intval', $request->input('staff_group_ids', []));
 
-        $getGroups = Group::where('status', true)->whereIn('id', $group_ids)->get();
-
-        $payload['staff_group_ids'] = $getGroups->pluck('id')->toArray();
+        $payload['staff_group_ids'] = Group::where('status', true)
+          ->whereIn('id', $groupIds)
+          ->pluck('id')
+          ->toArray();
       } else {
         $payload['staff_group_ids'] = [];
       }
@@ -64,7 +71,9 @@ class UserController extends Controller
       Helper::addHistory('Cập nhật thông tin của ' . $user->username . ' [' . $action . ']', $payload);
 
       return redirect()->back()->with('success', 'Cập nhật thông tin của ' . $user->username . ' thành công');
-    } elseif ($action === 'plus-money') {
+    }
+
+    if ($action === 'plus-money') {
       $payload = $request->validate([
         'amount' => 'required|numeric|min:0',
         'reason' => 'nullable|string|max:255',
@@ -103,7 +112,9 @@ class UserController extends Controller
       Helper::addHistory('Cộng tiền thành công cho ' . $user->username . ' [' . $action . ']', $payload);
 
       return redirect()->back()->with('success', 'Cộng tiền thành công cho ' . $user->username . ', số dư cuối : ' . Helper::formatCurrency($user->balance));
-    } elseif ($action === 'sub-money') {
+    }
+
+    if ($action === 'sub-money') {
       $payload = $request->validate([
         'amount' => 'required|numeric|min:0',
         'reason' => 'nullable|string|max:255',
@@ -132,7 +143,9 @@ class UserController extends Controller
       Helper::addHistory('Trừ tiền tài khoản ' . $user->username . ' thành công [' . $action . ']', $payload);
 
       return redirect()->back()->with('success', 'Trừ tiền tài khoản ' . $user->username . ', số dư cuối : ' . Helper::formatCurrency($user->balance));
-    } else if ($action === 'plus-commision') {
+    }
+
+    if ($action === 'plus-commision') {
       $payload = $request->validate([
         'amount' => 'required|numeric|min:0',
         'reason' => 'nullable|string|max:255',
@@ -158,7 +171,9 @@ class UserController extends Controller
       Helper::addHistory('Cộng hoa hồng cho ' . $user->username . ' [' . $action . ']', $payload);
 
       return redirect()->back()->with('success', 'Cộng hoa hồng cho ' . $user->username . ', số dư cuối : ' . Helper::formatCurrency($user->colla_balance));
-    } else if ($action === 'sub-commision') {
+    }
+
+    if ($action === 'sub-commision') {
       $payload = $request->validate([
         'amount' => 'required|numeric|min:0',
         'reason' => 'nullable|string|max:255',
@@ -184,8 +199,8 @@ class UserController extends Controller
       Helper::addHistory('Trừ hoa hồng cho ' . $user->username . ' [' . $action . ']', $payload);
 
       return redirect()->back()->with('success', 'Trừ hoa hồng cho ' . $user->username . ', số dư cuối : ' . Helper::formatCurrency($user->colla_balance));
-    } else {
-      return redirect()->back()->with('error', 'Không tìm thấy hành động');
     }
+
+    return redirect()->back()->with('error', 'Không tìm thấy hành động');
   }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Boosting;
 
 use App\Http\Controllers\Controller;
+use App\Models\CollaTransaction;
 use App\Models\GBOrder;
 use App\Models\User;
 use Helper;
@@ -48,7 +49,7 @@ class OrderController extends Controller
           'type'           => 'boosting-refund',
           'extras'         => [],
           'status'         => 'paid',
-          'content'        => 'Hoàn tiền đơn vật phẩm ' . $order->name,
+          'content'        => 'Hoàn tiền đơn cày thuê ' . $order->name,
           'user_id'        => $client->id,
           'username'       => $client->username,
         ]);
@@ -62,5 +63,66 @@ class OrderController extends Controller
     Helper::addHistory('Cập nhật đơn hàng ' . $order->id . ' trạng thái ' . $payload['status']);
 
     return redirect()->back()->with('success', 'Cập nhật đơn hàng thành công');
+  }
+
+  public function approvePayment($id)
+  {
+    $order = GBOrder::findOrFail($id);
+
+    if ($order->assigned_status === 'Completed') {
+      return redirect()->back()->with('error', 'Đơn này đã duyệt tiền rồi');
+    }
+
+    if ($order->assigned_status !== 'WaitPayment') {
+      return redirect()->back()->with('error', 'Đơn này chưa ở trạng thái chờ duyệt');
+    }
+
+    if (!$order->assigned_to) {
+  return redirect()->back()->with('error', 'Đơn chưa có CTV nhận');
+}
+
+$staff = User::where('username', $order->assigned_to)->first();
+
+    if (!$staff) {
+      return redirect()->back()->with('error', 'Không tìm thấy CTV');
+    }
+
+    $amount = (float) $order->assigned_payment;
+
+    if ($amount <= 0) {
+      $amount = (float) (($order->payment * $staff->colla_percent) / 100);
+    }
+
+    if ($amount <= 0) {
+      return redirect()->back()->with('error', 'Số tiền duyệt không hợp lệ');
+    }
+
+    $before = $staff->colla_balance;
+    $after  = $before + $amount;
+
+    $staff->update([
+      'colla_balance' => $after,
+    ]);
+
+    $order->update([
+      'assigned_payment' => $amount,
+      'assigned_status'  => 'Completed',
+    ]);
+
+    CollaTransaction::create([
+      'type'           => 'boosting',
+      'user_id'        => $staff->id,
+      'username'       => $staff->username,
+      'amount'         => $amount,
+      'status'         => 'Completed',
+      'reference'      => $order->code,
+      'description'    => 'Duyệt tiền cày thuê đơn #' . $order->code,
+      'balance_before' => $before,
+      'balance_after'  => $after,
+    ]);
+
+    Helper::addHistory('Duyệt tiền CTV đơn cày thuê #' . $order->code);
+
+    return redirect()->back()->with('success', 'Đã duyệt tiền CTV thành công');
   }
 }
