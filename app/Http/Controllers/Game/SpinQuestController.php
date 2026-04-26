@@ -23,4 +23,14 @@ class SpinQuestController extends Controller
       'pageTitle' => 'Vòng quay may mắn',
     ], compact('spinQuests'));
   }
+
+public function play(Request $request, $id)
+{
+    return response()->json([
+        'success' => true,
+        'message' => 'Quay OK test',
+        'id' => $id,
+        'request' => $request->all(),
+    ]);
+}
 }

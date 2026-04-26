@@ -67,7 +67,9 @@ Route::prefix('/cay-thue')->group(function () {
 Route::prefix('/games')->group(function () {
   // Spin Quest
   Route::get('/spin-quest/{id?}', [App\Http\Controllers\Game\SpinQuestController::class, 'index'])->name('games.spin-quest');
-});
+  Route::post('/spin-quest/{id}/play', [App\Http\Controllers\Game\SpinQuestController::class, 'play'])
+    ->name('games.spin-quest.play');
+  });
 
 // Accounts Routes
 Route::middleware(['auth', 'check.last.login'])->prefix('/account')->group(function () {
