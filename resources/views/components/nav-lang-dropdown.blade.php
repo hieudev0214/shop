@@ -5,7 +5,7 @@
   $availableLocales = config('app.available_locales');
 @endphp
 
-<div class="leading-0 relative">
+<!-- <div class="leading-0 relative">
   {{-- <button @click="listView = !listView" class="inline-flex items-center rounded-lg text-center text-sm font-medium text-slate-800 focus:outline-none focus:ring-0 dark:text-white" type="button" data-bs-toggle="dropdown"
     aria-expanded="false">
     <iconify-icon class="mr-2 text-lg" icon="emojione:flag-for-{{ $currentLangFlag }}"></iconify-icon>
@@ -26,4 +26,4 @@
     </ul>
   </div> --}}
   <div class="gtranslate_wrapper"></div>
-</div>
+</div> -->

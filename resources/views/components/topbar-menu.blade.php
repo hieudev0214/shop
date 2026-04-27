@@ -42,7 +42,7 @@
     </x-menu-item>
 
     {{-- Account Profile --}}
-    <x-menu-item href="{{ route('account.profile.index') }}" icon="iconamoon:profile" :label="__t('Tài Khoản')" :isActive="request()->routeIs('account.profile.index')" />
+    <!-- <x-menu-item href="{{ route('account.profile.index') }}" icon="iconamoon:profile" :label="__t('Tài Khoản')" :isActive="request()->routeIs('account.profile.index')" /> -->
 
     {{-- Deposit Menu --}}
     <x-menu-item icon="gg:credit-card" :label="__t('Nạp Tiền')" :hasSubmenu="true">
