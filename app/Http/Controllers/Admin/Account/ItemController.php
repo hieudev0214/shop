@@ -64,7 +64,12 @@ class ItemController extends Controller
     } else {
       $group = Group::findOrFail($id);
 
-      return view('admin.accounts.items.index', compact('group'));
+$groups = Group::where('category_id', $group->category_id)
+  ->where('status', 1)
+  ->orderBy('name')
+  ->get();
+
+return view('admin.accounts.items.index', compact('group', 'groups'));
     }
   }
 
@@ -141,9 +146,18 @@ class ItemController extends Controller
     }, $highlights);
 
     $autoCode = true;
-    if (count($listItem) === 1 && !empty($payload['code'])) {
-      $autoCode = false;
-    }
+
+if (count($listItem) === 1 && !empty($payload['code'])) {
+  $existsCode = ListItem::where('code', $payload['code'])->exists();
+
+  if ($existsCode) {
+    return redirect()->back()
+      ->withInput()
+      ->with('error', 'Mã sản phẩm #' . $payload['code'] . ' đã tồn tại, vui lòng nhập mã khác hoặc bỏ trống để hệ thống tự tạo.');
+  }
+
+  $autoCode = false;
+}
 
     $listChamp = explode('|', $request->input('list_champ', ''));
     $listChamp = array_map(function ($item) {

@@ -63,6 +63,14 @@
             <li class="slide">
               <a href="{{ route('admin.accounts.categories') }}" class="side-menu__item {{ request()->routeIs('admin.accounts.categories') ? 'active' : '' }}">{{ __t('Quản Lý Chuyên Mục') }}</a>
             </li>
+
+            <li class="slide">
+  <a href="{{ route('admin.accounts.categories') }}?open_add_product=1"
+     class="side-menu__item">
+    <i class="bx bx-plus side-menu__icon"></i>
+    <span class="side-menu__label">Thêm Sản Phẩm</span>
+  </a>
+</li>
           </ul>
         </li>
         <!-- End::slide -->

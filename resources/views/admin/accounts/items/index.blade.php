@@ -16,6 +16,16 @@
           <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Tên sản phẩm cần bán" required>
         </div>
         <div class="mb-3">
+  <label for="id" class="form-label">Chọn nhóm đăng sản phẩm</label>
+  <select name="id" id="id" class="form-control" required>
+    @foreach ($groups as $g)
+      <option value="{{ $g->id }}" @if ($g->id == old('id', $group->id)) selected @endif>
+        {{ $g->name }}
+      </option>
+    @endforeach
+  </select>
+</div>
+        <div class="mb-3">
           <label for="code" class="form-label">Mã sản phẩm</label>
           <input type="number" class="form-control" id="code" name="code" value="{{ old('code') }}">
           <i>Mã này chỉ có hiệu lực khi bạn nhập 1 tài khoản, nếu lớn hơn 1 tài khoản hệ thống sẽ random tất cả</i>
@@ -57,12 +67,26 @@
           </div>
         </div>
         <div class="mb-3">
-          <label for="list_item" class="form-label">Danh sách tài khoản</label>
-          <textarea class="form-control" id="list_item" name="list_item" rows="3" required>{{ old('list_item') }}</textarea>
-          <i>* Nhập nhiều hơn 1 tài khoản thì nó sẽ nhân bản sản phẩm giống nhau, chủ yếu dùng cho mua random</i>
-          <br />
-          <i>* Mỗi dòng là 1 sản phẩm, có thể nhập USERNAME|PASSWORD|2FA, nội dung này sẽ hiển thị cho người mua</i>
-        </div>
+  <label for="list_item" class="form-label">Tài khoản / Mật khẩu</label>
+
+  <textarea
+    class="form-control"
+    id="list_item"
+    name="list_item"
+    rows="5"
+    required
+    placeholder="Ví dụ:
+MS 101|Liên Hệ Zalo 0369.679.388 ĐỂ LẤY TÀI KHOẢN MẬT KHẨU
+acc01|pass01|2FA hoặc cookie
+acc02|pass02|ghi chú thêm">{{ old('list_item') }}</textarea>
+
+  <small class="text-muted d-block mt-1">
+    Mỗi dòng là 1 sản phẩm. Định dạng: <b>TÀI_KHOẢN|MẬT_KHẨU|TUỲ_CHỌN</b>
+  </small>
+  <small class="text-muted d-block">
+    Nếu nhập nhiều dòng, hệ thống sẽ tự tạo nhiều sản phẩm giống nhau, mỗi dòng là một tài khoản riêng.
+  </small>
+</div>
         <div class="mb-3">
           <label for="highlights" class="form-label">Chi tiết sản phẩm</label>
           <textarea class="form-control" id="highlights" name="highlights" rows="3" required>{{ old('highlights') }}</textarea>
