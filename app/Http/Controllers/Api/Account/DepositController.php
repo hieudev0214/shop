@@ -217,12 +217,24 @@ class DepositController extends Controller
         ], 400);
       }
     } catch (\Exception $e) {
-      return response()->json([
-        'data'    => $user->role === 'admin' ? $e->getMessage() : null,
-        'status'  => 400,
-        'message' => 'Lỗi kết nối API, vui lòng kiểm tra lại',
-      ], 400);
-    }
+  Log::error('SEND CARD API ERROR', [
+    'message' => $e->getMessage(),
+    'line'    => $e->getLine(),
+    'file'    => $e->getFile(),
+    'config'  => [
+      'api_url'    => $config['api_url'] ?? null,
+      'partner_id' => $config['partner_id'] ?? null,
+    ],
+  ]);
+
+  return response()->json([
+    'data'    => auth()->user()?->role === 'admin' ? $e->getMessage() : null,
+    'status'  => 400,
+    'message' => auth()->user()?->role === 'admin'
+      ? $e->getMessage()
+      : 'Lỗi kết nối API, vui lòng kiểm tra lại',
+  ], 400);
+}
   }
 
   private function parseCardError($string)
