@@ -115,19 +115,19 @@ class SpinQuest extends Model
   }
 
   private function getLocationByIndex($randomIndex)
-  {
-    switch ((string) $randomIndex) {
-      case '1': return 360;
-      case '2': return 320;
-      case '3': return 270;
-      case '4': return 230;
-      case '5': return 180;
-      case '6': return 130;
-      case '7': return 85;
-      case '8': return 44;
-      default: return null;
+{
+    switch ((int) $randomIndex) {
+        case 1: return 0;    // RANDOM KC (12h)
+        case 2: return 45;   // 99
+        case 3: return 90;   // 899
+        case 4: return 135;  // 1299
+        case 5: return 180;  // 3999
+        case 6: return 225;  // 5999
+        case 7: return 270;  // 7999
+        case 8: return 315;  // 9999
+        default: return 0;
     }
-  }
+}
 
   public function inventoryVar()
   {
