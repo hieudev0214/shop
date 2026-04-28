@@ -17,6 +17,14 @@
           <label for="image" class="form-label">Ảnh Vòng Quay</label>
           <input class="form-control" type="file" id="image" name="image">
         </div>
+        <div class="mb-3">
+  <label>Ảnh Nút Quay</label>
+  <input type="file" name="button_image" class="form-control">
+
+  @if (!empty($spinQuest->button_image))
+    <img src="{{ $spinQuest->button_image }}" style="width:120px;margin-top:10px">
+  @endif
+</div>
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="name" class="form-label">Tên Vòng Quay</label>

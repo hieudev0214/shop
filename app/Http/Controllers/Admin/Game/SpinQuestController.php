@@ -23,21 +23,26 @@ class SpinQuestController extends Controller
   public function store(Request $request)
   {
     $payload = $request->validate([
-      'name'        => 'required|string',
-      'cover'       => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
-      'image'       => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
-      'price'       => 'required|integer',
-      'status'      => 'required|boolean',
-      'invar_id'    => 'nullable|integer|exists:inventory_vars,id',
-      'category_id' => 'nullable|integer|exists:categories,id',
+      'name'         => 'required|string',
+      'cover'        => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10000',
+      'image'        => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10000',
+      'button_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10000',
+      'price'        => 'required|integer',
+      'status'       => 'required|boolean',
+      'invar_id'     => 'nullable|integer|exists:inventory_vars,id',
+      'category_id'  => 'nullable|integer|exists:categories,id',
     ]);
 
-    if ($request->has('cover')) {
+    if ($request->hasFile('cover')) {
       $payload['cover'] = Helper::uploadFile($request->file('cover'), 'public');
     }
 
-    if ($request->has('image')) {
+    if ($request->hasFile('image')) {
       $payload['image'] = Helper::uploadFile($request->file('image'), 'public');
+    }
+
+    if ($request->hasFile('button_image')) {
+      $payload['button_image'] = Helper::uploadFile($request->file('button_image'), 'public');
     }
 
     $payload['prizes'] = [];
@@ -58,38 +63,44 @@ class SpinQuestController extends Controller
     return view('admin.game.spin-quest.show', compact('spinQuest', 'categories', 'inventoryVars'));
   }
 
-
   public function update(Request $request)
   {
     $payload = $request->validate([
-      'id'          => 'required|integer',
-      'name'        => 'required|string',
-      'type'        => 'required|string',
-      'cover'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
-      'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
-      'descr'       => 'nullable|string',
-      'price'       => 'required|integer',
-      'status'      => 'required|boolean',
-      'store_id'    => 'nullable|integer',
-      'invar_id'    => 'nullable|integer|exists:inventory_vars,id',
-      'category_id' => 'nullable|integer|exists:categories,id',
+      'id'           => 'required|integer',
+      'name'         => 'required|string',
+      'type'         => 'required|string',
+      'cover'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10000',
+      'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10000',
+      'button_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10000',
+      'descr'        => 'nullable|string',
+      'price'        => 'required|integer',
+      'status'       => 'required|boolean',
+      'store_id'     => 'nullable|integer',
+      'invar_id'     => 'nullable|integer|exists:inventory_vars,id',
+      'category_id'  => 'nullable|integer|exists:categories,id',
     ]);
 
     $spinQuest = SpinQuest::findOrFail($payload['id']);
 
-    if ($request->has('cover')) {
+    if ($request->hasFile('cover')) {
       $payload['cover'] = Helper::uploadFile($request->file('cover'), 'public');
     } else {
       $payload['cover'] = $spinQuest->cover;
     }
 
-    if ($request->has('image')) {
+    if ($request->hasFile('image')) {
       $payload['image'] = Helper::uploadFile($request->file('image'), 'public');
     } else {
       $payload['image'] = $spinQuest->image;
     }
 
-    $payload['descr'] = Helper::htmlPurifier($payload['descr']);
+    if ($request->hasFile('button_image')) {
+      $payload['button_image'] = Helper::uploadFile($request->file('button_image'), 'public');
+    } else {
+      $payload['button_image'] = $spinQuest->button_image;
+    }
+
+    $payload['descr'] = Helper::htmlPurifier($payload['descr'] ?? '');
 
     $spinQuest->update($payload);
 
@@ -110,14 +121,12 @@ class SpinQuestController extends Controller
     $prizes = [];
 
     foreach ($payload['prizes'] as $prize) {
-      // if value is empty, set = 0
       $prize['value'] = $prize['value'] == '' ? 0 : $prize['value'];
-      // if percent is empty, set = 0
       $prize['percent'] = $prize['percent'] == '' ? 0 : $prize['percent'];
-      // if value is not number, check if it is a range (100-200 <=> {number}-{number})
+
       if (!is_numeric($prize['value'])) {
         $range = explode('-', $prize['value']);
-        // if it is a range, set min = range[0] and max = range[1]
+
         if (count($range) == 2) {
           $prize['min']    = $range[0];
           $prize['max']    = $range[1];
@@ -128,14 +137,16 @@ class SpinQuestController extends Controller
         $prize['max']    = $prize['value'];
         $prize['random'] = false;
       }
+
       $prize['game_invar_id'] = $prize['game_invar_id'] ?? null;
 
       $prizes[] = $prize;
     }
 
-    $spinQuest->update(
-      ['prizes' => $prizes],
-    );
+    $spinQuest->update([
+      'prizes' => $prizes,
+    ]);
+
     Helper::addHistory("Cập nhật giải thưởng vòng quay ($spinQuest->name)");
 
     return redirect()->back()->with('success', 'Cập nhật giải thưởng thành công');
