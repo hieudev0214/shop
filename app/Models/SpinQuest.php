@@ -105,15 +105,17 @@ class SpinQuest extends Model
       ];
     }
 
-    $randomIndex = $weightedItems[array_rand($weightedItems)] + 1;
+$randomIndex = $weightedItems[array_rand($weightedItems)] + 1;
 
-// CHƠI THẬT LUÔN CHỈ VÀO Ô RANDOM KC
-$location = 90;
+// Chơi thật luôn quay về ô RANDOM KC
+$location = 0;
 
-    return [
-      'data' => $items[$randomIndex - 1] ?? null,
-      'location' => $location,
-    ];
+$reward = $items[$randomIndex - 1] ?? null;
+
+return [
+  'data' => $reward,
+  'location' => $location,
+];
   }
 
   private function getLocationByIndex($randomIndex)
