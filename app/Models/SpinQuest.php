@@ -40,80 +40,98 @@ class SpinQuest extends Model
   public function canPlay()
   {
     $arr = $this->prizes ?? [];
-
     $totalPercent = 0;
 
     foreach ($arr as $item) {
-      $totalPercent += $item['percent'] ?? 0;
+      $totalPercent += (int) ($item['percent'] ?? 0);
     }
 
-    if ($totalPercent === 0) {
-      return false;
-    }
-
-    return true;
+    return $totalPercent > 0;
   }
 
   public function playGame($test = false)
   {
-    $items         = $this->prizes ?? [];
-    $weightedItems = [];
+    $items = $this->prizes ?? [];
 
-    if ($test && !in_array(domain(), ['shopbiloi.com'])) {
-      foreach ($items as $index => $item) {
-        $items[$index]['percent'] = 80;
-      }
+    /*
+    |--------------------------------------------------------------------------
+    | 🎯 CHƠI THỬ (FAKE GIẢI TO)
+    |--------------------------------------------------------------------------
+    */
+    if ($test) {
+
+      $fakeRewards = [
+        ['value' => 9999],
+        ['value' => 7999],
+        ['value' => 5999],
+        ['value' => 3999],
+        ['value' => 1299],
+        ['value' => 899],
+        ['value' => 99],
+      ];
+
+      // random giải
+      $fake = $fakeRewards[array_rand($fakeRewards)];
+
+      // random vị trí quay cho đẹp
+      $randomIndex = rand(1, 8);
+      $location = $this->getLocationByIndex($randomIndex);
+
+      return [
+        'data' => [
+          'value' => $fake['value'],
+          'label' => number_format($fake['value'], 0, ',', '.') . ' KC',
+        ],
+        'location' => $location,
+      ];
     }
 
-    foreach ($items as $index => $item) {
-      if ((int) $item['percent'] === 0) {
-        continue;
-      }
+    /*
+    |--------------------------------------------------------------------------
+    | 🎯 CHƠI THẬT (THEO TỈ LỆ ADMIN)
+    |--------------------------------------------------------------------------
+    */
+    $weightedItems = [];
 
-      for ($i = 0; $i < $item['percent']; $i++) {
-        // $weightedItems[] = $item['label'];
+    foreach ($items as $index => $item) {
+      $percent = (int) ($item['percent'] ?? 0);
+
+      if ($percent <= 0) continue;
+
+      for ($i = 0; $i < $percent; $i++) {
         $weightedItems[] = $index;
       }
     }
-    //
-    $randomIndex = $weightedItems[array_rand($weightedItems)] + 1;
 
-
-    $location = null;
-    switch ($randomIndex) {
-      case '1':
-        $location = 360;
-        break;
-      case '2':
-        $location = 320;
-        break;
-      case '3':
-        $location = 270;
-        break;
-      case '4':
-        $location = 230;
-        break;
-      case '5':
-        $location = 180;
-        break;
-      case '6':
-        $location = 130;
-        break;
-      case '7':
-        $location = 85;
-        break;
-      case '8':
-        $location = 44;
-        break;
-      default:
-        $location = null;
-        break;
+    if (empty($weightedItems)) {
+      return [
+        'data' => null,
+        'location' => null,
+      ];
     }
 
+    $randomIndex = $weightedItems[array_rand($weightedItems)] + 1;
+    $location = $this->getLocationByIndex($randomIndex);
+
     return [
-      'data'     => $items[$randomIndex - 1] ?? null,
-      'location' => $location ?? null,
+      'data' => $items[$randomIndex - 1] ?? null,
+      'location' => $location,
     ];
+  }
+
+  private function getLocationByIndex($randomIndex)
+  {
+    switch ((string) $randomIndex) {
+      case '1': return 360;
+      case '2': return 320;
+      case '3': return 270;
+      case '4': return 230;
+      case '5': return 180;
+      case '6': return 130;
+      case '7': return 85;
+      case '8': return 44;
+      default: return null;
+    }
   }
 
   public function inventoryVar()
