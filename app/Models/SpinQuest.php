@@ -106,7 +106,9 @@ class SpinQuest extends Model
     }
 
     $randomIndex = $weightedItems[array_rand($weightedItems)] + 1;
-    $location = $this->getLocationByIndex($randomIndex);
+
+// CHƠI THẬT LUÔN CHỈ VÀO Ô RANDOM KC
+$location = 90;
 
     return [
       'data' => $items[$randomIndex - 1] ?? null,
