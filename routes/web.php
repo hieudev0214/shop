@@ -4,7 +4,7 @@ use App\Helpers\Update;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Cache;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,6 +20,22 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
 Route::get('/join/{ref}', [App\Http\Controllers\HomeController::class, 'ref'])->name('ref');
 
 Auth::routes();
+
+Route::get('/ping-online', function () {
+    return response()->json(['ok' => true]);
+});
+
+Route::post('/offline-online', function () {
+    $onlineUsers = Cache::get('online_users', []);
+    $key = request('key');
+
+    if ($key && isset($onlineUsers[$key])) {
+        unset($onlineUsers[$key]);
+        Cache::put('online_users', $onlineUsers, now()->addMinutes(10));
+    }
+
+    return response()->json(['ok' => true]);
+});
 
 Route::get('/login/{provider}', [App\Http\Controllers\Auth\SocialController::class, 'redirectToProvider'])->name('auth.social');
 Route::get('/login/{provider}/callback', [App\Http\Controllers\Auth\SocialController::class, 'handleProviderCallback'])->name('auth.social.callback');
@@ -67,9 +83,10 @@ Route::prefix('/cay-thue')->group(function () {
 Route::prefix('/games')->group(function () {
   // Spin Quest
   Route::get('/spin-quest/{id?}', [App\Http\Controllers\Game\SpinQuestController::class, 'index'])->name('games.spin-quest');
+
   Route::post('/spin-quest/{id}/play', [App\Http\Controllers\Game\SpinQuestController::class, 'play'])
     ->name('games.spin-quest.play');
-  });
+});
 
 // Accounts Routes
 Route::middleware(['auth', 'check.last.login'])->prefix('/account')->group(function () {
@@ -126,6 +143,7 @@ Route::middleware(['auth', 'check.last.login', 'admin'])->prefix('/admin')->grou
   // Dashboard
   Route::get('/', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
   Route::get('/update', [App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('admin.update');
+  Route::get('/online-stats', [App\Http\Controllers\Admin\DashboardController::class, 'onlineStats'])->name('admin.online-stats');
   // Affiliates
   Route::prefix('/affiliates')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\AffiliateController::class, 'index'])->name('admin.affiliates');

@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Services\SystemMonitor;
 use Helper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+
 
 class DashboardController extends Controller
 {
@@ -403,6 +405,26 @@ class DashboardController extends Controller
 
 
 
-    return view('admin.dashboard', compact('stats'));
+    $onlineStats = $this->getOnlineStats();
+
+    return view('admin.dashboard', compact('stats', 'onlineStats'));
   }
+
+  public function onlineStats()
+  {
+    return response()->json($this->getOnlineStats());
+  }
+
+  private function getOnlineStats()
+{
+    $onlineUsers = Cache::get('online_users', []);
+
+    return [
+        'online'  => count($onlineUsers),
+        'members' => collect($onlineUsers)->where('type', 'member')->count(),
+        'guests'  => collect($onlineUsers)->where('type', 'guest')->count(),
+        'today' => count(Cache::get('today_users', [])),
+        'updated' => now()->format('H:i:s'),
+    ];
+}
 }

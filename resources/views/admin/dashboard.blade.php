@@ -11,6 +11,126 @@
       color: #6a6767;
       font-size: 18px;
     }
+
+    .online-users-widget {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 99999;
+}
+
+.online-users-button {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color: #fff;
+  border: none;
+  font-size: 26px;
+  position: relative;
+}
+
+.online-users-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background: #ef4444;
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  line-height: 26px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.online-users-dot {
+  position: absolute;
+  left: 8px;
+  bottom: 7px;
+  width: 13px;
+  height: 13px;
+  background: #22c55e;
+  border-radius: 50%;
+  border: 3px solid #fff;
+}
+
+.online-users-popup {
+  width: 330px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0,0,0,.15);
+  position: absolute;
+  right: 0;
+  bottom: 78px;
+  display: none;
+  overflow: hidden;
+}
+
+.online-users-popup.show {
+  display: block;
+}
+
+.online-users-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+}
+
+.online-users-close {
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  color: #999;
+}
+
+.online-users-body {
+  padding: 20px;
+  text-align: center;
+}
+
+.online-main-number {
+  font-size: 42px;
+  color: #8b5cf6;
+  font-weight: 800;
+}
+
+.online-subtitle {
+  color: #999;
+  margin-bottom: 18px;
+}
+
+.online-users-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.online-users-card {
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 14px 5px;
+}
+
+.online-users-card strong {
+  display: block;
+  font-size: 24px;
+  color: #20b7df;
+}
+
+.online-users-card span {
+  color: #999;
+  font-size: 13px;
+}
+
+.online-users-footer {
+  border-top: 1px solid #eee;
+  padding: 14px 20px;
+  text-align: center;
+  color: #999;
+}
   </style>
   <section class="mb-3">
     <div class="mb-3 alert alert-secondary alert-dismissible fade show custom-alert-icon shadow-sm" role="alert">
@@ -198,9 +318,81 @@
       </div>
     </section>
   @endif
+
+  <div class="online-users-widget">
+  <div id="onlinePopup" class="online-users-popup show">
+    <div class="online-users-header">
+      <span>Online Users</span>
+      <button type="button" class="online-users-close" onclick="toggleOnlinePopup()">×</button>
+    </div>
+
+    <div class="online-users-body">
+      <div class="online-main-number" id="onlineNumber">{{ $onlineStats['online'] ?? 0 }}</div>
+      <div class="online-subtitle">users online</div>
+
+      <div class="online-users-grid">
+        <div class="online-users-card">
+          <strong id="onlineMembers">{{ $onlineStats['members'] ?? 0 }}</strong>
+          <span>Members</span>
+        </div>
+
+        <div class="online-users-card">
+          <strong id="onlineGuests">{{ $onlineStats['guests'] ?? 0 }}</strong>
+          <span>Guests</span>
+        </div>
+
+        <div class="online-users-card">
+          <strong id="onlineToday">{{ $onlineStats['today'] ?? 0 }}</strong>
+          <span>Hôm nay</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="online-users-footer">
+      Updated: <span id="onlineUpdated">{{ $onlineStats['updated'] ?? now()->format('H:i:s') }}</span>
+    </div>
+  </div>
+
+  <button type="button" class="online-users-button" onclick="toggleOnlinePopup()">
+    👥
+    <span class="online-users-badge" id="onlineBadge">{{ $onlineStats['online'] ?? 0 }}</span>
+    <span class="online-users-dot"></span>
+  </button>
+</div>
 @endsection
 @section('scripts')
   <script>
+
+function toggleOnlinePopup() {
+  document.getElementById('onlinePopup').classList.toggle('show');
+}
+
+const onlineKey = "{{ session('online_key') }}";
+
+function pingOnline() {
+  axios.get('/ping-online').then(() => {
+    loadOnlineStats();
+  });
+}
+
+pingOnline();
+
+setInterval(() => {
+  pingOnline();
+}, 1000);
+
+window.addEventListener('beforeunload', function () {
+  if (onlineKey) {
+    navigator.sendBeacon(
+      '/offline-online',
+      new Blob(
+        [JSON.stringify({ key: onlineKey })],
+        { type: 'application/json' }
+      )
+    );
+  }
+});
+
     const fixUpdate = () => {
       axios.get('/cron/artisan/fix-update').then(r => {
         console.log(r.data);
