@@ -422,22 +422,24 @@
                     <div class="deposit-input">
                       <label for="telco" class="form-label">{{ __t('Loại thẻ') }}</label>
                       <select class="form-control" id="telco" name="telco" required>
-                        <option value="">{{ __t('Chọn loại thẻ') }}</option>
-                        <option value="VIETTEL">Viettel - {{ __t('Phí') }} {{ $fees['VIETTEL'] ?? 20 }}%</option>
-                        <option value="VINAPHONE">Vinaphone - {{ __t('Phí') }} {{ $fees['VINAPHONE'] ?? 20 }}%</option>
-                        <option value="MOBIFONE">Mobifone - {{ __t('Phí') }} {{ $fees['MOBIFONE'] ?? 20 }}%</option>
-                        <option value="ZING">Zing Card - {{ __t('Phí') }} {{ $fees['ZING'] ?? 20 }}%</option>
+                            <option value="">{{ __t('Chọn loại thẻ') }}</option>
 
-                        @if (isset($fees['GARENA2']) && $fees['GARENA2'] != -1)
-                          <option value="GARENA2">Garena - {{ __t('Phí') }} {{ $fees['GARENA2'] ?? 20 }}%</option>
-                        @endif
+                            <option value="VIETTEL">Viettel - {{ __t('Phí') }} {{ $fees['VIETTEL'] ?? 20 }}%</option>
+                            <option value="VINAPHONE">Vinaphone - {{ __t('Phí') }} {{ $fees['VINAPHONE'] ?? 20 }}%</option>
+                            <option value="MOBIFONE">Mobifone - {{ __t('Phí') }} {{ $fees['MOBIFONE'] ?? 20 }}%</option>
+                            <option value="ZING">Zing Card - {{ __t('Phí') }} {{ $fees['ZING'] ?? 20 }}%</option>
 
-                        @if (isset($fees['GARENA']) && $fees['GARENA'] != -1)
-                          <option value="GARENA">Garena - {{ __t('Phí') }} {{ $fees['GARENA'] ?? 20 }}%</option>
-                        @endif
+                            {{-- Garena chỉ hiện 1 --}}
+                            @php
+                              $garenaFee = $fees['GARENA'] ?? $fees['GARENA2'] ?? null;
+                            @endphp
 
-                        <option value="VNMOBI">Vietnamobile - {{ __t('Phí') }} {{ $fees['VNMOBI'] ?? 20 }}%</option>
-                      </select>
+                            @if ($garenaFee !== null && $garenaFee != -1)
+                              <option value="GARENA">Garena - {{ __t('Phí') }} {{ $garenaFee }}%</option>
+                            @endif
+
+                            <option value="VNMOBI">Vietnamobile - {{ __t('Phí') }} {{ $fees['VNMOBI'] ?? 20 }}%</option>
+                       </select>
                     </div>
                   </div>
 
