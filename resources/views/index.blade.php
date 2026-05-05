@@ -173,6 +173,15 @@
       </div>
     @endif
 
+    <div class="mt-4 mb-4 rounded-lg bg-white p-4 text-center shadow-lg">
+      <h1 class="text-2xl font-bold text-primary">
+        Shop Acc Free Fire, Liên Quân Giá Rẻ Uy Tín
+      </h1>
+      <p class="mt-2 text-sm md:text-base">
+        ShopTQ4 chuyên bán acc Free Fire, acc Liên Quân giá rẻ, giao dịch tự động 24/7, nạp tiền nhanh, hỗ trợ khách hàng liên tục. Cam kết shop acc game uy tín, giá tốt cho anh em game thủ.
+      </p>
+    </div>
+
     @if ($homeNotice = Helper::getNotice('home_dashboard'))
       <div class="bg-white border border-primary p-3 mt-3 rounded-lg">
         {!! $homeNotice !!}
