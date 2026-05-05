@@ -10,6 +10,15 @@
 <head>
   <meta name="google-site-verification" content="gpUaM5EXvPSz74UM1fEriWPlrvVtFumpZlN5iQCmKlA" />
   <meta charset="utf-8">
+  <!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-T5G37F1X1Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-T5G37F1X1Y');
+</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="content-language" content="{{ currentLang() === 'vn' ? 'vi' : 'en' }}">
   <meta name="csrf-token" content="{{ csrf_token() }}">
