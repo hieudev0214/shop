@@ -8,6 +8,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" class="light layout-boxed null nav-floating horizontalMenu">
 
 <head>
+  <meta name="google-site-verification" content="gpUaM5EXvPSz74UM1fEriWPlrvVtFumpZlN5iQCmKlA" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="content-language" content="{{ currentLang() === 'vn' ? 'vi' : 'en' }}">
