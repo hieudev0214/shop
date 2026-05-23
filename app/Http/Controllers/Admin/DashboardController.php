@@ -415,15 +415,17 @@ class DashboardController extends Controller
     return response()->json($this->getOnlineStats());
   }
 
-  private function getOnlineStats()
+private function getOnlineStats()
 {
     $onlineUsers = Cache::get('online_users', []);
+
+    $todayKey = 'today_users_' . now()->format('Y-m-d');
 
     return [
         'online'  => count($onlineUsers),
         'members' => collect($onlineUsers)->where('type', 'member')->count(),
         'guests'  => collect($onlineUsers)->where('type', 'guest')->count(),
-        'today' => count(Cache::get('today_users', [])),
+        'today'   => count(Cache::get($todayKey, [])),
         'updated' => now()->format('H:i:s'),
     ];
 }

@@ -18,26 +18,38 @@ class TrackOnline
 
         session(['online_key' => $key]);
 
+        // online realtime
         $onlineUsers[$key] = [
             'type' => Auth::check() ? 'member' : 'guest',
             'time' => time(),
         ];
 
-        $todayUsers = Cache::get('today_users', []);
+        // ===== TODAY USERS THEO NGÀY =====
+        $todayCacheKey = 'today_users_' . now()->format('Y-m-d');
 
-$todayKey = date('Y-m-d') . '_' . $key;
+        $todayUsers = Cache::get($todayCacheKey, []);
 
-$todayUsers[$todayKey] = true;
+        // tránh F5 tăng số
+        $todayUsers[$key] = true;
 
-Cache::put('today_users', $todayUsers, now()->addDay());
+        Cache::put(
+            $todayCacheKey,
+            $todayUsers,
+            now()->endOfDay()
+        );
 
+        // remove offline users (>15s)
         foreach ($onlineUsers as $k => $user) {
             if (time() - $user['time'] > 15) {
                 unset($onlineUsers[$k]);
             }
         }
 
-        Cache::put('online_users', $onlineUsers, now()->addMinutes(10));
+        Cache::put(
+            'online_users',
+            $onlineUsers,
+            now()->addMinutes(10)
+        );
 
         return $next($request);
     }
