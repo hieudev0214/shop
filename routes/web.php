@@ -406,6 +406,7 @@ Route::middleware(['auth', 'check.last.login'])->prefix('/staff')->group(functio
 
   // Products
   Route::prefix('/products')->group(function () {
+    // --- KHỐI ROUTE SHOP NICK V1 (CŨ) ---
     Route::prefix('/accounts')->group(function () {
       Route::get('/groups', [App\Http\Controllers\Staff\Product\AccountController::class, 'index'])->name('staff.products.accounts.groups');
       Route::get('/items/{id}', [App\Http\Controllers\Staff\Product\AccountController::class, 'items'])->name('staff.products.accounts.items');
@@ -414,6 +415,19 @@ Route::middleware(['auth', 'check.last.login'])->prefix('/staff')->group(functio
       Route::post('/items/update', [App\Http\Controllers\Staff\Product\AccountController::class, 'update'])->name('staff.products.accounts.items.update');
       Route::post('/items/delete', [App\Http\Controllers\Staff\Product\AccountController::class, 'delete'])->name('staff.products.accounts.items.delete');
       Route::post('/items/delete-list', [App\Http\Controllers\Staff\Product\AccountController::class, 'deleteList'])->name('staff.products.accounts.items.delete-list');
+    });
+
+    // ================= KHỐI ROUTE SHOP NICK V2 ĐẦY ĐỦ TÍNH NĂNG =================
+    Route::prefix('/accountsv2')->group(function () {
+      Route::get('/groups', [App\Http\Controllers\Staff\Product\AccountV2Controller::class, 'index'])->name('staff.products.accountsv2.groups');
+      Route::get('/items/{id}', [App\Http\Controllers\Staff\Product\AccountV2Controller::class, 'items'])->name('staff.products.accountsv2.items');
+      
+      // Khai báo thêm các route Thêm/Sửa/Xóa dưới đây để fix lỗi "not defined"
+      Route::post('/items/store', [App\Http\Controllers\Staff\Product\AccountV2Controller::class, 'store'])->name('staff.products.accountsv2.items.store');
+      Route::get('/items/edit/{id}', [App\Http\Controllers\Staff\Product\AccountV2Controller::class, 'show'])->name('staff.products.accountsv2.items.show');
+      Route::post('/items/update', [App\Http\Controllers\Staff\Product\AccountV2Controller::class, 'update'])->name('staff.products.accountsv2.items.update');
+      Route::post('/items/delete', [App\Http\Controllers\Staff\Product\AccountV2Controller::class, 'delete'])->name('staff.products.accountsv2.items.delete');
+      Route::post('/items/delete-list', [App\Http\Controllers\Staff\Product\AccountV2Controller::class, 'deleteList'])->name('staff.products.accountsv2.items.delete-list');
     });
   });
 
@@ -440,6 +454,41 @@ Route::middleware(['auth', 'check.last.login'])->prefix('/staff')->group(functio
     Route::post('/store', [App\Http\Controllers\Staff\WithdrawController::class, 'store'])->name('staff.withdraws.store');
   });
 });
+
+Route::prefix('/accounts')->group(function () {
+  // Accounts/Categories
+  Route::prefix('/categories')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\Account\CategoryController::class, 'index'])->name('admin.accounts.categories');
+    Route::post('/store', [App\Http\Controllers\Admin\Account\CategoryController::class, 'store'])->name('admin.accounts.categories.store');
+    Route::post('/update', [App\Http\Controllers\Admin\Account\CategoryController::class, 'update'])->name('admin.accounts.categories.update');
+    Route::post('/delete', [App\Http\Controllers\Admin\Account\CategoryController::class, 'delete'])->name('admin.accounts.categories.delete');
+  });
+  // Accounts/Groups -> Categories
+  Route::prefix('/groups')->group(function () {
+    Route::get('/{id}', [App\Http\Controllers\Admin\Account\GroupController::class, 'index'])->name('admin.accounts.groups');
+    Route::get('/{id}/create', [App\Http\Controllers\Admin\Account\GroupController::class, 'create'])->name('admin.accounts.groups.create');
+    Route::post('/store', [App\Http\Controllers\Admin\Account\GroupController::class, 'store'])->name('admin.accounts.groups.store');
+    Route::get('/{id}/edit/{gid}', [App\Http\Controllers\Admin\Account\GroupController::class, 'edit'])->name('admin.accounts.groups.edit');
+    Route::post('/update', [App\Http\Controllers\Admin\Account\GroupController::class, 'update'])->name('admin.accounts.groups.update');
+    Route::post('/delete', [App\Http\Controllers\Admin\Account\GroupController::class, 'delete'])->name('admin.accounts.groups.delete');
+  });
+  // Accounts/Items -> Groups
+  Route::prefix('/items')->group(function () {
+    Route::get('/{id?}', [App\Http\Controllers\Admin\Account\ItemController::class, 'index'])->name('admin.accounts.items');
+    Route::post('/store', [App\Http\Controllers\Admin\Account\ItemController::class, 'store'])->name('admin.accounts.items.store');
+    Route::post('/copy-list', [App\Http\Controllers\Admin\Account\ItemController::class, 'copyList'])->name('admin.accounts.items.copy-list');
+    Route::post('/update-list', [App\Http\Controllers\Admin\Account\ItemController::class, 'updateList'])->name('admin.accounts.items.update-list');
+    Route::get('/edit/{id}', [App\Http\Controllers\Admin\Account\ItemController::class, 'show'])->name('admin.accounts.items.show');
+    Route::post('/update', [App\Http\Controllers\Admin\Account\ItemController::class, 'update'])->name('admin.accounts.items.update');
+    Route::post('/delete', [App\Http\Controllers\Admin\Account\ItemController::class, 'delete'])->name('admin.accounts.items.delete');
+    Route::post('/delete-list', [App\Http\Controllers\Admin\Account\ItemController::class, 'deleteList'])->name('admin.accounts.items.delete-list');
+  });
+});
+
+
+
+
+
 
 // Cron Routes
 Route::prefix('/cron')->group(function () {

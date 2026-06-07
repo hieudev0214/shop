@@ -1,5 +1,3 @@
-<!-- Developer: quocbaodev | fb.com/baoint | quocbao@cmsnt.co -->
-<!-- Dev By CMSNT.CO | FB.COM/CMSNT.CO | ZALO.ME/0947838128 | MMO Solution -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light" data-menu-styles="dark" data-toggled="close">
 
@@ -294,6 +292,18 @@
   <!-- Scroll To Top -->
 
   @include('admin.layouts.partials.vendor')
+
+<script>
+    if (typeof $.fn.dataTable !== 'undefined') {
+        $.fn.dataTable.ext.errMode = 'none';
+    } else {
+        window.addEventListener('DOMContentLoaded', function() {
+            if (typeof $.fn.dataTable !== 'undefined') {
+                $.fn.dataTable.ext.errMode = 'none';
+            }
+        });
+    }
+  </script>
 
 </body>
 

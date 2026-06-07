@@ -73,8 +73,13 @@
         'boosting' => 'Cày thuê',
     ];
 
+    // Lấy danh sách nhóm V1 cũ
     $staffGroups = \App\Models\Group::where('status', true)->orderBy('id', 'desc')->get();
     $selectedStaffGroups = $user->staff_group_ids ?? [];
+
+    // Lấy danh sách nhóm V2 chuẩn theo hệ thống của bạn
+    $staffGroupsV2 = \App\Models\GroupV2::where('status', true)->orderBy('id', 'desc')->get();
+    $selectedStaffGroupsV2 = $user->staff_group_v2_ids ?? [];
   @endphp
 
   <div class="card custom-card">
@@ -160,7 +165,7 @@
         </div>
 
         <div class="form-group mb-3" id="ctv-group-wrapper">
-          <label class="form-label fw-bold">Nhóm tài khoản CTV được phép quản lý</label>
+          <label class="form-label fw-bold">Nhóm tài khoản CTV được phép quản lý (Bản cũ V1)</label>
 
           <div class="ctv-group-box">
             <div class="ctv-group-actions">
@@ -184,6 +189,37 @@
                   >
                   <span class="check-icon">✓</span>
                   <span>ID {{ $group->id }}: {{ $group->name }}</span>
+                </label>
+              @endforeach
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group mb-3" id="ctv-group-v2-wrapper">
+          <label class="form-label fw-bold text-primary">Nhóm tài khoản CTV được phép quản lý (Bản V2)</label>
+
+          <div class="ctv-group-box" style="border-color: #ccdfff; background: #f0f5ff;">
+            <div class="ctv-group-actions">
+              <button type="button" class="btn btn-sm btn-primary" onclick="selectAllCtvGroupsV2()">Chọn tất cả</button>
+              <button type="button" class="btn btn-sm btn-danger" onclick="clearAllCtvGroupsV2()">Bỏ chọn</button>
+            </div>
+
+            <div class="d-flex flex-wrap">
+              @foreach ($staffGroupsV2 as $groupv2)
+                @php
+                  $checkedV2 = in_array($groupv2->id, $selectedStaffGroupsV2);
+                @endphp
+
+                <label class="ctv-group-tag ctv-group-v2-tag {{ $checkedV2 ? 'active' : '' }}">
+                  <input
+                    type="checkbox"
+                    name="staff_group_v2_ids[]"
+                    value="{{ $groupv2->id }}"
+                    {{ $checkedV2 ? 'checked' : '' }}
+                    hidden
+                  >
+                  <span class="check-icon">✓</span>
+                  <span>ID {{ $groupv2->id }}: {{ $groupv2->name }}</span>
                 </label>
               @endforeach
             </div>
@@ -362,7 +398,8 @@
 
 @section('scripts')
   <script>
-    document.querySelectorAll('.ctv-group-tag').forEach(function(tag) {
+    // Xử lý các tag Nhóm V1
+    document.querySelectorAll('.ctv-group-tag:not(.ctv-group-v2-tag)').forEach(function(tag) {
       tag.addEventListener('click', function(e) {
         e.preventDefault();
 
@@ -373,7 +410,7 @@
     });
 
     function selectAllCtvGroups() {
-      document.querySelectorAll('.ctv-group-tag').forEach(function(tag) {
+      document.querySelectorAll('.ctv-group-tag:not(.ctv-group-v2-tag)').forEach(function(tag) {
         const input = tag.querySelector('input');
         input.checked = true;
         tag.classList.add('active');
@@ -381,7 +418,34 @@
     }
 
     function clearAllCtvGroups() {
-      document.querySelectorAll('.ctv-group-tag').forEach(function(tag) {
+      document.querySelectorAll('.ctv-group-tag:not(.ctv-group-v2-tag)').forEach(function(tag) {
+        const input = tag.querySelector('input');
+        input.checked = false;
+        tag.classList.remove('active');
+      });
+    }
+
+    // Xử lý các tag Nhóm V2 độc lập
+    document.querySelectorAll('.ctv-group-v2-tag').forEach(function(tag) {
+      tag.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const input = tag.querySelector('input');
+        input.checked = !input.checked;
+        tag.classList.toggle('active', input.checked);
+      });
+    });
+
+    function selectAllCtvGroupsV2() {
+      document.querySelectorAll('.ctv-group-v2-tag').forEach(function(tag) {
+        const input = tag.querySelector('input');
+        input.checked = true;
+        tag.classList.add('active');
+      });
+    }
+
+    function clearAllCtvGroupsV2() {
+      document.querySelectorAll('.ctv-group-v2-tag').forEach(function(tag) {
         const input = tag.querySelector('input');
         input.checked = false;
         tag.classList.remove('active');

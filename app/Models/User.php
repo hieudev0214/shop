@@ -52,6 +52,7 @@ class User extends Authenticatable
     'last_login_ip',
 
     'staff_group_ids',
+    'staff_group_v2_ids',
   ];
 
   /**
@@ -75,6 +76,7 @@ class User extends Authenticatable
 
     'received_gift'     => 'boolean',
     'staff_group_ids'   => 'array',
+    'staff_group_v2_ids' => 'array',
 
 
     'balance'           => 'decimal:2',

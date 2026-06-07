@@ -1,6 +1,5 @@
 <aside class="app-sidebar sticky" id="sidebar">
 
-  <!-- Start::main-sidebar-header -->
   <div class="main-sidebar-header">
     <a href="{{ route('admin.dashboard') }}" class="header-logo">
       <img src="/cmsnt/cmsnt_light.png" alt="logo" class="desktop-logo">
@@ -11,12 +10,8 @@
       <img src="/_admin/images/brand-logos/toggle-white.png" alt="logo" class="toggle-white">
     </a>
   </div>
-  <!-- End::main-sidebar-header -->
-
-  <!-- Start::main-sidebar -->
   <div class="main-sidebar" id="sidebar-scroll">
 
-    <!-- Start::nav -->
     <nav class="main-menu-container nav nav-pills flex-column sub-open">
       <div class="slide-left" id="slide-left">
         <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24">
@@ -24,61 +19,50 @@
         </svg>
       </div>
       <ul class="main-menu">
-        <!-- Start::slide__category -->
         <li class="slide__category"><span class="category-name">Main</span></li>
-        <!-- End::slide__category -->
-
-        <!-- Start::slide -->
         <li class="slide">
           <a href="{{ route('staff.dashboard') }}" class="side-menu__item {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
             <i class="bx bx-home side-menu__icon"></i>
             <span class="side-menu__label">{{ __t('Bảng Điều Khiển') }}</span>
           </a>
         </li>
-        <!-- End::slide -->
-
-        <!-- Start::slide__category -->
         <li class="slide__category"><span class="category-name">Staff Menu</span></li>
-        <!-- End::slide__category -->
-
         @if (auth()->user()->colla_type === 'items')
-          <!-- Start::slide -->
           <li class="slide">
             <a href="{{ route('staff.orders.items.index') }}" class="side-menu__item {{ request()->routeIs('staff.orders.items.index') ? 'active' : '' }}">
               <i class="bx bx-data side-menu__icon"></i>
               <span class="side-menu__label">{{ __t('Đơn hàng vật phẩm') }}</span>
             </a>
           </li>
-          <!-- End::slide -->
-        @endif
+          @endif
         @if (auth()->user()->colla_type === 'boosting')
-          <!-- Start::slide -->
           <li class="slide">
             <a href="{{ route('staff.orders.boostings.index') }}" class="side-menu__item {{ request()->routeIs('staff.orders.boostings.index') ? 'active' : '' }}">
               <i class="bx bx-data side-menu__icon"></i>
               <span class="side-menu__label">{{ __t('Đơn hàng cày thuê') }}</span>
             </a>
           </li>
-          <!-- End::slide -->
-        @endif
+          @endif
         @if (auth()->user()->colla_type === 'account')
-          <!-- Start::slide -->
           <li class="slide">
             <a href="{{ route('staff.products.accounts.groups') }}" class="side-menu__item {{ request()->routeIs('staff.products.accounts.groups') ? 'active' : '' }}">
               <i class="bx bx-data side-menu__icon"></i>
-              <span class="side-menu__label">{{ __t('Quản lý tài khoản') }}</span>
+              <span class="side-menu__label">{{ __t('Quản lý tài khoản V1') }}</span>
             </a>
           </li>
-          <!-- End::slide -->
-          <!-- Start::slide -->
+          <li class="slide">
+            <a href="{{ route('staff.products.accountsv2.groups') }}" class="side-menu__item {{ request()->routeIs('staff.products.accountsv2.groups') ? 'active' : '' }}">
+              <i class="bx bx-layer side-menu__icon" style="color: #00ecff;"></i>
+              <span class="side-menu__label" style="color: #00ecff; font-weight: bold;">{{ __t('Quản lý tài khoản V2') }}</span>
+            </a>
+          </li>
           <li class="slide">
             <a href="{{ route('staff.orders.accounts.index') }}" class="side-menu__item {{ request()->routeIs('staff.orders.accounts.index') ? 'active' : '' }}">
               <i class="bx bx-cart side-menu__icon"></i>
               <span class="side-menu__label">{{ __t('Đơn hàng tài khoản') }}</span>
             </a>
           </li>
-          <!-- End::slide -->
-        @endif
+          @endif
 
       </ul>
       <div class="slide-right" id="slide-right">
@@ -87,9 +71,5 @@
         </svg>
       </div>
     </nav>
-    <!-- End::nav -->
-
-  </div>
-  <!-- End::main-sidebar -->
-
-</aside>
+    </div>
+  </aside>

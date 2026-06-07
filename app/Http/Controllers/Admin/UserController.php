@@ -31,39 +31,50 @@ class UserController extends Controller
 
     if ($action === 'update-info') {
       $payload = $request->validate([
-        'role'              => 'required|in:admin,member,collaborator,partner,accounting',
-        'email'             => 'required|email|unique:users,email,' . $id,
-        'status'            => 'required|in:active,locked',
-        'password'          => 'nullable|string|min:6',
-        'balance_1'         => 'required|numeric|min:0',
-        'colla_type'        => 'nullable|in:account,boosting,items',
-        'colla_percent'     => 'nullable|numeric|min:0|max:100',
-        'staff_group_ids'   => 'nullable|array',
-        'staff_group_ids.*' => 'integer|exists:groups,id',
+        'role'                 => 'required|in:admin,member,collaborator,partner,accounting',
+        'email'                => 'required|email|unique:users,email,' . $id,
+        'status'               => 'required|in:active,locked',
+        'password'             => 'nullable|string|min:6',
+        'balance_1'            => 'required|numeric|min:0',
+        'colla_type'           => 'nullable|in:account,boosting,items',
+        'colla_percent'        => 'nullable|numeric|min:0|max:100',
+        'staff_group_ids'      => 'nullable|array',
+        'staff_group_ids.*'    => 'integer|exists:groups,id',
+        'staff_group_v2_ids'   => 'nullable|array',
+        'staff_group_v2_ids.*' => 'integer|exists:group_v2_s,id',
       ]);
 
       $user = User::findOrFail($id);
 
-      if (!empty($payload['password'])) {
-        $payload['password'] = bcrypt($payload['password']);
+      // --- XỬ LÝ FIX LỖI PASSWORD CANNOT BE NULL ---
+      if ($request->filled('password')) {
+        // Nếu có nhập mật khẩu mới thì tiến hành mã hóa hóa bảo mật trước khi lưu
+        $payload['password'] = bcrypt($request->password);
       } else {
+        // Nếu bỏ trống ô mật khẩu, xóa hẳn trường này ra khỏi danh sách update để giữ nguyên pass cũ
         unset($payload['password']);
       }
 
-      /*
-       * Nếu là CTV tài khoản:
-       * - Lưu đúng nhóm admin đã chọn trong form.
-       * - Không tự động gán tất cả nhóm nữa.
-       */
       if (($request->input('colla_type') ?? null) === 'account') {
+        // --- XỬ LÝ LƯU NHÓM V1 (CŨ) ---
         $groupIds = array_map('intval', $request->input('staff_group_ids', []));
 
         $payload['staff_group_ids'] = Group::where('status', true)
           ->whereIn('id', $groupIds)
           ->pluck('id')
           ->toArray();
+
+        // --- XỬ LÝ LƯU NHÓM V2 (MỚI THÊM) ---
+        $groupIdsV2 = array_map('intval', $request->input('staff_group_v2_ids', []));
+
+        $payload['staff_group_v2_ids'] = \App\Models\GroupV2::where('status', true)
+          ->whereIn('id', $groupIdsV2)
+          ->pluck('id')
+          ->toArray();
+
       } else {
         $payload['staff_group_ids'] = [];
+        $payload['staff_group_v2_ids'] = []; // Xóa trắng nhóm V2 nếu không phải CTV tài khoản
       }
 
       $user->update($payload);
