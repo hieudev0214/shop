@@ -16,6 +16,17 @@
         background: #210000;
         color: #fff;
       }
+
+      /* ================= BỔ SUNG ĐOẠN NÀY ĐỂ HIỂN THỊ FULL TIÊU ĐỀ ================= */
+      .section-product h2.text-truncate, 
+      .section-product .card-title,
+      .section-product h5 {
+        white-space: normal !important;        /* Cho phép bẻ hàng xuống dòng tự nhiên */
+        overflow: visible !important;          /* Hiển thị toàn bộ chữ bị tràn */
+        text-overflow: clip !important;        /* Gỡ bỏ cấu hình dấu ba chấm cũ */
+        display: block !important;
+        min-height: 48px;                      /* Giữ các ô đều nhau nếu tiêu đề dài 2 dòng */
+      }
     </style>
   @endpush
 
