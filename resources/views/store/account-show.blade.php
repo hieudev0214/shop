@@ -8,7 +8,7 @@
       <div class="card">
         <div class="card-body grid grid-cols-1 gap-x-6 p-6 md:grid-cols-2">
           <div class="mb-5 md:mb-0">
-            <img src="{{ $item->image }}" class="h-[200px] w-full cursor-pointer rounded-lg md:h-[300px]" alt="">
+            <img id="main-avatar" src="{{ $item->image }}" class="h-[200px] w-full cursor-pointer rounded-lg md:h-[300px] object-contain" alt="">
           </div>
           <div class="flex flex-col justify-center space-y-3 text-center">
             <div class="mb-2">
@@ -109,51 +109,21 @@
               <div class="tab-content" id="pills-tabContentHorizontal">
                 <div class="tab-pane fade show active" id="pills-infomation" role="tabpanel" aria-labelledby="pills-home-tabHorizontal">
                   <div class="space-y-5">
-                    {{-- <div class="rounded-md bg-slate-800 px-6 py-[18px] text-sm font-normal text-white dark:bg-slate-900 dark:text-slate-300">
-                      <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                        <iconify-icon class="text-2xl" icon="system-uicons:target"></iconify-icon>
-                        <p class="font-Inter">
-                          {!! $item->description !!}
-                        </p>
-                      </div>
-                    </div> --}}
-
                     <div class="card border border-red-400 p-3">
                       <div class="card-body">
                         {!! $item->description !!}
                       </div>
                     </div>
 
-                    @if (theme_config('show_all_account_img'))
-                      <div class="grid grid-cols-1 gap-3">
-                        @foreach ($item->list_image as $image)
-                          <div class="gallery cursor-pointer">
-                            <a href="{{ asset($image) }}" data-fancybox="gallery" data-caption="Image #{{ $loop->iteration }}">
-                              <img class="w-full h-full rounded-sm lazyload" src="{{ asset('/images/svg/spinner.svg') }}" data-src="{{ asset($image) }}" alt="{{ $item->name }}">
-                            </a>
-                          </div>
-                        @endforeach
-                      </div>
-
-                      @push('css')
-                        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
-                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
-                      @endpush
-
-                      @push('scripts')
-                        <script>
-                          Fancybox.bind("[data-fancybox]", {
-                            // Your custom options
-                          });
-                        </script>
-                      @endpush
-                    @else
-                      <div class="slider basic-carousel owl-carousel">
-                        @foreach ($item->list_image as $image)
-                          <img class="w-full lg:h-[600px]" src="{{ asset($image) }}" alt="{{ $item->name }}">
-                        @endforeach
-                      </div>
-                    @endif
+                    <div class="slider basic-carousel owl-carousel">
+                      @foreach ($item->list_image as $image)
+                        <div class="item" data-src-url="{{ asset($image) }}">
+                          <a href="{{ asset($image) }}" data-fancybox="gallery" data-caption="Ảnh {{ $loop->iteration }}">
+                            <img class="w-full lg:h-[600px] object-contain cursor-zoom-in" src="{{ asset($image) }}" alt="{{ $item->name }}">
+                          </a>
+                        </div>
+                      @endforeach
+                    </div>
 
                   </div>
                 </div>
@@ -186,21 +156,86 @@
         </div>
       </div>
     </div>
+
+    @if(isset($related_accounts) && $related_accounts->count() > 0)
+      <div class="card mt-6">
+        <div class="card-body p-6">
+          <header class="mb-5 flex items-center border-b border-slate-100 pb-5 dark:border-slate-700">
+            <div class="flex-1">
+              <div class="card-title text-slate-900 dark:text-white font-bold uppercase text-lg text-center md:text-left">{{ __t('Tài khoản liên quan') }}</div>
+            </div>
+          </header>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            @foreach($related_accounts as $rel)
+              <div class="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+                <div>
+                  <a href="{{ route('store.account.show', ['code' => $rel->code]) }}">
+                    <img src="{{ $rel->image }}" class="w-full h-[150px] object-cover" alt="Nick #{{ $rel->code }}">
+                  </a>
+                  <div class="p-4 text-center space-y-2">
+                    <h3 class="font-bold text-slate-800 dark:text-slate-200 text-base">MS: {{ $rel->code }}</h3>
+                    <p class="text-primary font-bold text-lg">{{ $rel->price_str }}</p>
+                  </div>
+                </div>
+                <div class="p-4 pt-0">
+                  <a href="{{ route('store.account.show', ['code' => $rel->code]) }}" class="btn btn-sm btn-primary w-full block text-center justify-center">
+                    {{ __t('Chi Tiết') }}
+                  </a>
+                </div>
+              </div>
+            @endforeach
+          </div>
+        </div>
+      </div>
+    @endif
+
     <div id="fullpage" onclick="this.style.display='none';"></div>
   </section>
+
+  @push('css')
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+  @endpush
+
   @push('scripts')
     @vite(['resources/js/plugins/owl.carousel.min.js'])
     <script type="module">
-      // Basic Carousel
-      $(".basic-carousel").owlCarousel({
-        loop: true,
-        nav: true,
-        items: 1,
-        lazyLoad: true,
-        navText: [
-          '<button class="btn btn-sm btn-outline-primary"><i class="fas fa-arrow-left text-white"></i></button>',
-          '<button class="btn btn-sm btn-outline-primary"><i class="fas fa-arrow-right text-white"></i></button>',
-        ],
+      $(document).ready(function() {
+        // Khởi tạo slider kèm theo tính năng đồng bộ ảnh đại diện phía trên
+        var owl = $(".basic-carousel");
+        
+        owl.owlCarousel({
+          loop: false,
+          nav: true,
+          items: 1,
+          lazyLoad: true,
+          navText: [
+            '<button class="btn btn-sm btn-outline-primary"><i class="fas fa-arrow-left text-white"></i></button>',
+            '<button class="btn btn-sm btn-outline-primary"><i class="fas fa-arrow-right text-white"></i></button>',
+          ],
+          // Hàm này kích hoạt mỗi khi người dùng bấm chuyển slide ảnh
+          onChanged: function(event) {
+            if (event.item.count > 0) {
+              // Tìm đến phần tử ảnh đang hiển thị hiện tại trong slide
+              var currentItem = $(event.target).find(".owl-item").eq(event.item.index).find(".item");
+              var newImgSrc = currentItem.attr("data-src-url");
+              
+              // Thay đổi đường dẫn ảnh đại diện lớn phía trên
+              if (newImgSrc) {
+                $("#main-avatar").attr("src", newImgSrc);
+              }
+            }
+          }
+        });
+
+        // Giữ nguyên tính năng click phóng to thu nhỏ ảnh như trước
+        Fancybox.bind("[data-fancybox='gallery']", {
+          infinite: false,
+          Thumbs: {
+            autoStart: true,
+          }
+        });
       });
     </script>
 
@@ -222,7 +257,6 @@
               }
             })
           }
-
 
           $('#btnBuy').html('<i class="fa fa-spinner fa-spin"></i> Đang Xử Lý...').prop('disabled', true);
 
@@ -256,19 +290,11 @@
             didOpen: () => {
               Swal.showLoading();
             },
-            willClose: () => {},
           });
 
           try {
-            const {
-              data: result
-            } = await axios.post('/api/stores/accounts/' + item.code + '/buy')
-
-            const {
-              username,
-              password,
-              extra_data
-            } = result.data;
+            const { data: result } = await axios.post('/api/stores/accounts/' + item.code + '/buy')
+            const { username, password } = result.data;
 
             Swal.fire('Thành công', `${result.message}<br /><br />Tài Khoản: ${username}<br />Mật Khẩu: ${password}`, 'success').then(() => {
               window.open('/account/orders/accounts/' + item.code, '_self')

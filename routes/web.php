@@ -61,6 +61,9 @@ Route::prefix('/tai-khoan')->group(function () {
   Route::get('/thong-tin/{code}', [App\Http\Controllers\Store\AccountController::class, 'show'])->name('store.account.show');
 });
 
+// ROUTE CHO TRỢ LÝ AI CHATBOT VIPPRO
+Route::post('/api/ai-chat', [App\Http\Controllers\Store\AccountController::class, 'chatAI']);
+
 // Store Routes -> AccountsV2
 Route::prefix('/tai-khoan-v2')->group(function () {
   Route::get('/{slug}', [App\Http\Controllers\Store\AccountV2Controller::class, 'index'])->name('store.accountv2');
