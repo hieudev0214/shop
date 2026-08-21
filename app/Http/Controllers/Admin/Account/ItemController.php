@@ -8,6 +8,7 @@ use App\Models\ListItem;
 use App\Models\ListItemArchive;
 use Helper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ItemController extends Controller
 {
@@ -204,21 +205,50 @@ if (count($listItem) === 1 && !empty($payload['code'])) {
 
     $created = [];
 
-    if ($type === 'account') {
-      foreach ($listItem as $item) {
-        $data      = parseItem($item);
-        $code      = $autoCode ? ListItem::generateCode() : $payload['code'];
-        $created[] = ListItem::create([
+    DB::transaction(function () use ($type, $listItem, $autoCode, $payload, $listSkin, $rawSkins, $listChamp, $highlights, $group, &$created) {
+      if ($type === 'account') {
+        foreach ($listItem as $item) {
+          $data      = parseItem($item);
+          $code      = $autoCode ? ListItem::generateCode() : $payload['code'];
+          $created[] = ListItem::create([
+            'name'        => $payload['name'] ?? $code,
+            'code'        => $code,
+            'cost'        => $payload['cost'],
+            'price'       => $payload['price'],
+            'discount'    => $payload['discount'],
+            'status'      => $payload['status'],
+            'image'       => $payload['image'] ?? null,
+            'username'    => $data['username'],
+            'password'    => $data['password'],
+            'extra_data'  => $data['extra_data'],
+            'list_skin'   => $listSkin,
+            'raw_skins'   => $rawSkins,
+            'list_champ'  => $listChamp,
+            'highlights'  => $highlights,
+            'description' => Helper::htmlPurifier($payload['description'] ?? ''),
+            'list_image'  => $payload['list_image'] ?? [],
+            'priority'    => 0,
+            'group_id'    => $group->id,
+            'buyer_name'  => null,
+            'buyer_code'  => null,
+
+            // 'staff_name'  => auth()->user()->username,
+          ]);
+        }
+      } else {
+        $code = $autoCode ? ListItem::generateCode() : $payload['code'];
+        $item = ListItem::create([
           'name'        => $payload['name'] ?? $code,
           'code'        => $code,
+          'type'        => 'account_group',
           'cost'        => $payload['cost'],
           'price'       => $payload['price'],
           'discount'    => $payload['discount'],
           'status'      => $payload['status'],
           'image'       => $payload['image'] ?? null,
-          'username'    => $data['username'],
-          'password'    => $data['password'],
-          'extra_data'  => $data['extra_data'],
+          'username'    => '-',
+          'password'    => '-',
+          'extra_data'  => '-',
           'list_skin'   => $listSkin,
           'raw_skins'   => $rawSkins,
           'list_champ'  => $listChamp,
@@ -232,49 +262,22 @@ if (count($listItem) === 1 && !empty($payload['code'])) {
 
           // 'staff_name'  => auth()->user()->username,
         ]);
-      }
-    } else {
-      $code = $autoCode ? ListItem::generateCode() : $payload['code'];
-      $item = ListItem::create([
-        'name'        => $payload['name'] ?? $code,
-        'code'        => $code,
-        'type'        => 'account_group',
-        'cost'        => $payload['cost'],
-        'price'       => $payload['price'],
-        'discount'    => $payload['discount'],
-        'status'      => $payload['status'],
-        'image'       => $payload['image'] ?? null,
-        'username'    => '-',
-        'password'    => '-',
-        'extra_data'  => '-',
-        'list_skin'   => $listSkin,
-        'raw_skins'   => $rawSkins,
-        'list_champ'  => $listChamp,
-        'highlights'  => $highlights,
-        'description' => Helper::htmlPurifier($payload['description'] ?? ''),
-        'list_image'  => $payload['list_image'] ?? [],
-        'priority'    => 0,
-        'group_id'    => $group->id,
-        'buyer_name'  => null,
-        'buyer_code'  => null,
 
-        // 'staff_name'  => auth()->user()->username,
-      ]);
+        if ($item) {
+          foreach ($listItem as $account) {
+            $data = parseItem($account);
 
-      if ($item) {
-        foreach ($listItem as $account) {
-          $data = parseItem($account);
+            $created[] = ListItemArchive::create([
+              'code'       => $item->id,
+              'username'   => $data['username'],
+              'password'   => $data['password'],
+              'extra_data' => $data['extra_data'],
+            ]);
 
-          $created[] = ListItemArchive::create([
-            'code'       => $item->id,
-            'username'   => $data['username'],
-            'password'   => $data['password'],
-            'extra_data' => $data['extra_data'],
-          ]);
-
+          }
         }
       }
-    }
+    });
 
     Helper::addHistory('Thêm ' . count($created) . ' sản phẩm cho nhóm ' . $group->name);
 

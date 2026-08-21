@@ -117,15 +117,18 @@ class ListItemV2 extends Model
     return Helper::formatCurrency($discount);
   }
 
-  public static function generateCode()
+  public static function generateCode($tries = 20)
   {
-    $code = date('y') . date('m') . Helper::randomNumber(4);
+    for ($i = 0; $i < $tries; $i++) {
+      $code = date('y') . date('m') . Helper::randomNumber(6);
 
-    if (self::where('code', $code)->exists()) {
-      return self::generateCode();
+      if (!self::where('code', $code)->exists()) {
+        return $code;
+      }
     }
 
-    return $code;
+    // Fallback nếu không gian mã ngẫu nhiên đã cạn: thêm hậu tố dựa trên microtime để đảm bảo duy nhất.
+    return date('y') . date('m') . substr(str_replace('.', '', microtime(true)), -8);
   }
 
   public function getRevenueAttribute()
